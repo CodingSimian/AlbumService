@@ -3,6 +3,7 @@ package com.AlbumService.Service;
 import com.AlbumService.Model.Album;
 import com.AlbumService.Model.Song;
 import com.AlbumService.Repository.AlbumRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -22,57 +23,90 @@ public class AlbumService {
     @Autowired
     public RestTemplate restTemplate;
 
-    public void saveSongToAlbum(Album albumToBeSaved,String songName){
-    albumToBeSaved.getSongs().add(songName);
+    public void saveSongToAlbum(Album albumToBeSaved,Song songToBeAdded){
+        //Songs are saved in a specific order in the arraylist representing the album
+        //Artist names are added to the song name, as part of the string.
+        ArrayList<String> artistNames = new ArrayList<>();
+        for(int i = 0; i < songToBeAdded.getArtists().size(); i++){
+            artistNames.add(songToBeAdded.getArtists().get(i).getName());
+        }
+
+    albumToBeSaved.getSongs().add(songToBeAdded.getAlb_order(),songToBeAdded.getName() + "(" + artistNames + ")");
     albumRepository.save(albumToBeSaved);
     }
 
     public List<Album> getAlbums(String name) {
-        //Basically this method should take the return value from media service, in where it delivers all songs relating
-        //to the given artist AND none of the given songs are singles/releases.
+            //Basically this method should take the return value from media service, in where it delivers all songs relating
+            //to the given artist AND none of the given songs are singles/releases.
 
-        //Now, this return value could either be treated as a String, or as seprate objects. However the presentation
-        //only really needs to give 1. the album name, 2. The song name. 3. The songs relating artists.
+            //TODO include exception handling for if the sought artists albums already exist in the db
 
-        //Also if you just handle the string AS IS, then album service in of itself doesn't need any real mvc architecture
-        //Just a pojo object with a string property.
+            ResponseEntity<List<Song>> songResponse = restTemplate.exchange("http://localhost:8585/snongs/" + name, HttpMethod.GET,
+                    null, new ParameterizedTypeReference<List<Song>>() {
+                    });
+            List<Song> someMoreSongsAgain = songResponse.getBody();
 
-        //TODO include exception handling for if the sought artists albums already exist in the db
+            for (int i = 0; i < someMoreSongsAgain.size(); i++) {
 
-        ResponseEntity<List<Song>> songResponse = restTemplate.exchange("http://localhost:8585/snongs/" + name, HttpMethod.GET,
-                null, new ParameterizedTypeReference<List<Song>>() {
-        });
-        List<Song> someMoreSongsAgain = songResponse.getBody();
-
-    //ArrayList<Song> allValues =restTemplate.get("http://localhost:8585/snongs/" + name, ArrayList.class);
-        //String allValues =restTemplate.getForObject("http://localhost:8585/snongs/" + name, String.class);
-        for(int i =0; i < someMoreSongsAgain.size(); i++){
-            String album_id = String.valueOf(someMoreSongsAgain.get(i).getAlbum_id());
-            Album albumToBeSaved = albumRepository.findAlbumByAlbumIdentification(album_id);
+                //Method call necessary because if album not found, one should be created
+                Album albumToBeSaved = getAlbum(someMoreSongsAgain.get(i));
 
 
-        //writing if(!albumToBeSaved.getSongs().contains(allValues.get(i).getName()) is the same as writing
-            //if(albumToBeSaved.getSongs().contains(allValues.get(i).getName()) == false
+                ArrayList<String> artistNames = new ArrayList<>();
+                for (int b = 0; b < someMoreSongsAgain.get(i).getArtists().size(); b++) {
+                    artistNames.add(someMoreSongsAgain.get(i).getArtists().get(b).getName());
+                }
 
+                //Specific if statement for if songs are to be saved to an album
+                if (!albumToBeSaved.getSongs().contains(someMoreSongsAgain.get(i).getName() + "(" + artistNames + ")")) {
+                    saveSongToAlbum(albumToBeSaved, someMoreSongsAgain.get(i));
+                }
 
-            //TODO change the logic in this method, for some reasons all the songs are added even if they are already part
-            //of the album
-            if(albumToBeSaved.getSongs().contains(someMoreSongsAgain.get(i).getName()) == false){
-            saveSongToAlbum(albumToBeSaved, someMoreSongsAgain.get(i).getName());
+            }
+            return albumRepository.findAlbumsByArtistName(name);
+
+    }
+
+        public Album getSpecificAlbum (String id){
+            return albumRepository.findAlbumByAlbumIdentification(id);
         }
 
+        public Object getSongs (String name){
+            //List<Song> allValues =restTemplate.getForObject("http://localhost:8585/snongs/" + name, List.class);
+            String allValues = restTemplate.getForObject("http://localhost:8585/snongs/" + name, String.class);
+
+            return allValues;
         }
-        return albumRepository.findAll();
+
+
+        public Album getAlbum(Song songUsedToRetrieveAlbum){
+        try{
+            //If mongorepository does not find a entity in its repository, it will create a empty <Optional> object.
+            //This try and catch block would normally not catch any nullpointerexception errors because in
+            //java's eyes there is no error occuring. There is simply a empty object being returned.
+            Album albumToBeSaved = albumRepository.findAlbumByAlbumIdentification(String.valueOf(songUsedToRetrieveAlbum.getAlbum_id()));
+
+            //To truly check if the object is empty a variable must be assigned to one of the properties of the object.
+            //Only now, can we simulate a nullpointerexception error
+            String name = albumToBeSaved.getName();
+            return albumToBeSaved;
+        }catch (NullPointerException e){
+            System.out.println("Album was not registered in db");
+
+            Album albumToBeSaved = new Album();
+            //Let the artist responsible for the album be the first registrered artist for the first song
+            //on that album
+            albumToBeSaved.setArtistName(songUsedToRetrieveAlbum.getArtists().get(0).getName());
+            albumToBeSaved.set_id(new ObjectId());
+            albumToBeSaved.setAlbumIdentification(String.valueOf(songUsedToRetrieveAlbum.getAlbum_id()));
+            albumToBeSaved.setName("AlbumNr" + songUsedToRetrieveAlbum.getAlbum_id());
+            albumToBeSaved.setSongs(new ArrayList<>());
+
+            return albumToBeSaved;
+        }
+
+
+        }
     }
 
-    public Album getSpecificAlbum(String id){
-        return albumRepository.findAlbumByAlbumIdentification(id);
-    }
 
-    public Object getSongs(String name) {
-        //List<Song> allValues =restTemplate.getForObject("http://localhost:8585/snongs/" + name, List.class);
-        String allValues =restTemplate.getForObject("http://localhost:8585/snongs/" + name, String.class);
-
-        return allValues;
-    }
-}

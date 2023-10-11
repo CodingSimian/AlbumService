@@ -13,6 +13,16 @@ public class Album {
 
     String name;
 
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
+    String artistName;
+
     String albumIdentification;
 
     public String getAlbumIdentification() {
@@ -48,5 +58,15 @@ public class Album {
 
     public void setSongs(List<String> songs) {
         this.songs = songs;
+    }
+
+    @Override
+    public String toString() {
+        return "Album{" +
+                "_id=" + _id +
+                ", name='" + name + '\'' +
+                ", albumIdentification='" + albumIdentification + '\'' +
+                ", songs=" + songs +
+                '}';
     }
 }
