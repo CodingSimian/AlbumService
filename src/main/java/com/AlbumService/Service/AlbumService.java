@@ -107,6 +107,17 @@ public class AlbumService {
 
 
         }
+
+    public void updateAlbumName(String id, String newName) {
+        Album albumToBeUpdated = albumRepository.findAlbumByAlbumIdentification(id);
+        albumToBeUpdated.setName(newName);
+        albumRepository.save(albumToBeUpdated);
     }
+
+
+    public Album findSpecificAlbum(String id){
+        return albumRepository.findAlbumByAlbumIdentification(id);
+    }
+}
 
 
