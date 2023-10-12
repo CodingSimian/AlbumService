@@ -40,7 +40,6 @@ public class AlbumController {
     @RequestMapping("/Albums/{id}/change-name")
     public ResponseEntity updateAlbumName(@PathVariable("id") String id, @RequestBody String newName){
         albumService.updateAlbumName(id, newName);
-
         return new ResponseEntity("Album successfully changed name to " + albumService.findSpecificAlbum(id),HttpStatus.NO_CONTENT);
     }
 }
