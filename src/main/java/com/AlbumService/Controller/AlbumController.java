@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/album")
 public class AlbumController {
     //Ingen crud utöver get då albumservice ska endast presentera data den redan har, eller hämta ny data
 
@@ -18,7 +19,8 @@ public class AlbumController {
     @RequestMapping("/Artists/{name}/albums")
     public ResponseEntity getAllAlbums(@PathVariable("name") String name){
 
-        return new ResponseEntity(albumService.getAlbums(name),HttpStatus.OK);
+        return new ResponseEntity(albumService.getAlbumsWithoutArtistObjects(name),HttpStatus.OK);
+        //return new ResponseEntity(albumService.getAlbums(name),HttpStatus.OK);
     }
 
     @GetMapping
@@ -41,5 +43,11 @@ public class AlbumController {
     public ResponseEntity updateAlbumName(@PathVariable("id") String id, @RequestBody String newName){
         albumService.updateAlbumName(id, newName);
         return new ResponseEntity("Album successfully changed name to " + albumService.findSpecificAlbum(id),HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping
+    @RequestMapping("/Albums/everything")
+    public ResponseEntity getEverythingLol(){
+        return new ResponseEntity(albumService.getEverything(),HttpStatus.OK);
     }
 }

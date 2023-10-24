@@ -13,13 +13,7 @@ public class Album {
 
     String name;
 
-    public String getArtistName() {
-        return artistName;
-    }
-
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
-    }
+    List<String> songs;
 
     String artistName;
 
@@ -34,7 +28,7 @@ public class Album {
     }
 //TODO add so that the writer for each song is represented in the album
 
-    List<String> songs;
+
 
     public ObjectId get_id() {
         return _id;
@@ -58,6 +52,15 @@ public class Album {
 
     public void setSongs(List<String> songs) {
         this.songs = songs;
+    }
+
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
     }
 
     @Override

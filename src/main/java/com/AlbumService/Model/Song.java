@@ -19,7 +19,7 @@ public class Song {
 
     int album_id;
 
-    int alb_order;
+    int album_ord;
 
 
     List<Artist> artists;
@@ -48,12 +48,12 @@ public class Song {
         this.album_id = album_id;
     }
 
-    public int getAlb_order() {
-        return alb_order;
+    public int getAlbum_ord() {
+        return album_ord;
     }
 
-    public void setAlb_order(int alb_order) {
-        this.alb_order = alb_order;
+    public void setAlbum_ord(int album_ord) {
+        this.album_ord = album_ord;
     }
 
     public List<Artist> getArtists() {

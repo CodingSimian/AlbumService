@@ -6,12 +6,9 @@ import com.AlbumService.Model.Song;
 import com.AlbumService.Repository.AlbumRepository;
 import org.bson.types.ObjectId;
 import org.junit.Before;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
@@ -42,7 +39,7 @@ class AlbumServiceTest {
         sampleAlbum.setSongs(new ArrayList<>());
 
         Song sampleSong = new Song();
-        sampleSong.setAlb_order(0);
+        sampleSong.setAlbum_ord(0);
         sampleSong.setName("Sample Song");
         Artist artist = new Artist();
         artist.setName("Sample Artist");
