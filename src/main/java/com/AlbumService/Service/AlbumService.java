@@ -88,7 +88,7 @@ public class AlbumService {
 
         //TODO include exception handling for if the sought artists albums already exist in the db
 
-        ResponseEntity<List<Media>> songResponse = restTemplate.exchange("http://localhost:8081/media/" + name + "/allMedia/song", HttpMethod.GET,
+        ResponseEntity<List<Media>> songResponse = restTemplate.exchange("http://localhost:8081/" + name + "/allMedia/song", HttpMethod.GET,
                 null, new ParameterizedTypeReference<List<Media>>() {
                 });
         List<Media> someMoreSongsAgain = songResponse.getBody();
